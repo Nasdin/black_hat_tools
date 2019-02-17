@@ -4,7 +4,10 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_questions(in_url, refresh_counter=1000):
+def get_questions(in_url: str, refresh_counter: int = 1000):
+    """
+    Generates questions, refreshes the format and beautiful soup parse every `refresh_counter` in case the page changes
+    """
     while True:
 
         res = urllib.request.urlopen(in_url)
@@ -25,54 +28,30 @@ class ConfessionField(object):
     def __init__(self, google_form_output_dict: dict):
         self.raw_dict = google_form_output_dict.copy()
 
-        self._confession = ""
-        self._matriculation = ""
+        self.confession = ""
+        self.matriculation = ""
         self._confession_key = ""
-        self.matriculation_key = ""
+        self._matriculation_key = ""
 
         self._get_matriculation_form()
         self._get_confession_form()
 
     def output(self):
 
-        out = {}
-        out.update(self.confession)
-        out.update(self.matriculation)
-        return out
-
-    @property
-    def confession(self):
-
-        return {self._confession_key: self._confession}
-
-    @confession.setter
-    def confession(self, confess):
-
-        self._confession = confess
-
-    @property
-    def matriculation(self):
-
-        return {self._matriculation_key: self._matriculation}
-
-    @matriculation.setter
-    def matriculation(self, matriculate):
-
-        self._matriculation = matriculate
+        return {self._confession_key: self.confession,
+                self._matriculation_key: self.matriculation}
 
     def _get_confession_form(self):
-
-        for i, v in self.raw_dict.items():
-            if 'confession' in i.lower():
-                self._confession_key = self.raw_dict.pop(i)
-                break
+        for description in self.raw_dict.keys():
+            if 'confession' in description.lower():
+                self._confession_key = self.raw_dict.pop(description)
+                return
 
     def _get_matriculation_form(self):
-
-        for i, v in self.raw_dict.items():
-            if 'matriculation' in i.lower():
-                self._matriculation_key = self.raw_dict.pop(i)
-                break
+        for description in self.raw_dict.keys():
+            if 'matriculation' in description.lower():
+                self._matriculation_key = self.raw_dict.pop(description)
+                return
 
 
 def submit_response_factory(form_url, questions_generator, verbose=False):
@@ -81,7 +60,7 @@ def submit_response_factory(form_url, questions_generator, verbose=False):
                  'pageHistory': 0}
 
     user_agent = {'Referer': form_url,
-                  'User-Agent': "Python"}
+                  'User-Agent': "Python"}  # TODO, Spoof multiple User-Agent in case this gets fixed.
 
     def submit_response(matriculation, confession):
         confession_field = next(questions_generator)

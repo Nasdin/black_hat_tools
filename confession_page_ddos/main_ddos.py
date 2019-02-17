@@ -7,6 +7,7 @@ from google_form_handler import get_questions, submit_response_factory
 
 
 def student_matriculation_number_generator():
+    """ NTU """
     student_type_probabilities = {35: 'U', 30: 'G', 20: 'P', 10: 'D'}
     matriculation_year_range = (15, 18)
     school_code = [1, 2, 3, 4, 5]

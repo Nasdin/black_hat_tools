@@ -4,10 +4,7 @@ Takes confessions from reddit
 from itertools import cycle
 
 import pandas as pd
-
 from config import SOURCE_CONFESSION_CSV, FINISHED_CONFESSION_CSV
-
-source_dataset_df = pd.read_csv(SOURCE_CONFESSION_CSV)
 
 
 def confession_generator(checkpoint=50):
@@ -15,10 +12,10 @@ def confession_generator(checkpoint=50):
     Returns a confession, checkpoint saves every checkpoint
     :return:
     """
-
+    source_dataset_df = pd.read_csv(SOURCE_CONFESSION_CSV)
     try:
         parsed_confession_log_df = pd.read_csv(FINISHED_CONFESSION_CSV)
-    except:
+    except FileNotFoundError:
         parsed_confession_log_df = pd.DataFrame(data={"parsed_ids": []})
 
     newly_parsed = []
@@ -45,7 +42,7 @@ def confession_generator(checkpoint=50):
 
             yield confession
 
-        # End of checkpoint, time to save.
+        # End of checkpoint, time to save to csv, in case this was restarted, we will start back where we stop.
         parsed_confession_log_df['parsed_ids'] = parsed_confession_log_df['parsed_ids'].append(pd.Series(newly_parsed),
                                                                                                ignore_index=True)
         parsed_confession_log_df.to_csv(FINISHED_CONFESSION_CSV, index=False)
